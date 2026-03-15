@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrustTheHood / Корзина</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <style>
+        /* Основные стили для корзины */
+        .cart-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 40px;
+        }
+        
+        @media (max-width: 768px) {
+            .cart-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Заголовок корзины */
+        .cart-header {
+            display: grid;
+            grid-template-columns: 3fr 1fr 1fr 0.5fr;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            color: var(--text-light);
+        }
+        
+        /* Элемент корзины */
+        .cart-item {
+            display: grid;
+            grid-template-columns: 3fr 1fr 1fr 0.5fr;
+            align-items: center;
+            padding: 25px 0;
+            border-bottom: 1px solid var(--border);
+            transition: background-color 0.2s;
+        }
+        
+        .cart-item:hover {
+            background-color: #fafafa;
+        }
+        
+        .cart-item-product {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .cart-item-image {
+            width: 100px;
+            height: 130px;
+            background: #f6f6f6;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .cart-item-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .cart-item-details {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .cart-item-title {
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
+        .cart-item-size {
+            font-size: 13px;
+            color: var(--text-light);
+            text-transform: uppercase;
+        }
+        
+        .cart-item-price {
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
+        .cart-item-price-rub {
+            font-size: 14px;
+            color: var(--text-light);
+        }
+        
+        /* Селектор количества */
+        .cart-item-quantity {
+            display: flex;
+            align-items: center;
+            border: 1px solid var(--border);
+            width: fit-content;
+            background: white;
+        }
+        
+        .cart-qty-btn {
+            width: 40px;
+            height: 40px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .cart-qty-btn:hover {
+            background: var(--border);
+        }
+        
+        .cart-qty-btn:active {
+            background: var(--text);
+            color: white;
+        }
+        
+        .cart-qty-input {
+            width: 50px;
+            height: 40px;
+            text-align: center;
+            border: none;
+            border-left: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            font-family: var(--font-main);
+            font-size: 15px;
+            font-weight: 500;
+        }
+        
+        /* Кнопка удаления */
+        .cart-item-remove {
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--text-light);
+            text-decoration: underline;
+            text-underline-offset: 3px;
+            transition: color 0.2s;
+            text-align: center;
+        }
+        
+        .cart-item-remove:hover {
+            color: #ef4444;
+        }
+        
+        /* Боковая панель с итогами */
+        .cart-sidebar {
+            background: #f9f9f9;
+            border: 1px solid var(--border);
+            padding: 30px;
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+        }
+        
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Промокод */
+        .promo-section {
+            margin-bottom: 25px;
+        }
+        
+        .promo-input-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .promo-input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid var(--border);
+            font-family: var(--font-main);
+            font-size: 14px;
+            background: white;
+        }
+        
+        .promo-input:focus {
+            outline: none;
+            border-color: var(--text);
+        }
+        
+        .promo-btn {
+            padding: 12px 20px;
+            background: var(--text);
+            color: white;
+            border: 1px solid var(--text);
+            font-family: var(--font-main);
+            font-size: 13px;
+            font-weight: 500;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .promo-btn:hover:not(:disabled) {
+            background: white;
+            color: var(--text);
+        }
+        
+        .promo-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .promo-success {
+            margin-top: 10px;
+            font-size: 13px;
+            color: #22c55e;
+            display: none;
+        }
+        
+        .promo-error {
+            margin-top: 10px;
+            font-size: 13px;
+            color: #ef4444;
+            display: none;
+        }
+        
+        /* Расчеты */
+        .cart-calculations {
+            margin: 25px 0;
+            padding: 20px 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .calc-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 15px;
+        }
+        
+        .calc-row.total {
+            font-weight: 700;
+            font-size: 18px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .shipping-note {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-top: 10px;
+        }
+        
+        .free-shipping-progress {
+            margin: 20px 0;
+            background: var(--border);
+            height: 4px;
+            position: relative;
+        }
+        
+        .free-shipping-bar {
+            height: 4px;
+            background: var(--text);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .free-shipping-text {
+            font-size: 12px;
+            margin-top: 8px;
+            color: var(--text-light);
+        }
+        
+        /* Способы оплаты */
+        .payment-methods {
+            margin: 25px 0;
+        }
+        
+        .payment-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+        
+        .payment-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .payment-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            border: 1px solid var(--border);
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .payment-option:hover {
+            border-color: var(--text);
+        }
+        
+        .payment-option.selected {
+            border-color: var(--text);
+            background: #f0f0f0;
+        }
+        
+        .payment-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .payment-option label {
+            flex: 1;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .payment-icon {
+            width: 40px;
+            height: 25px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        
+        /* Кнопка оформления */
+        .checkout-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--text);
+            color: white;
+            border: 1px solid var(--text);
+            font-family: var(--font-main);
+            font-size: 16px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 20px;
+        }
+        
+        .checkout-btn:hover:not(:disabled) {
+            background: white;
+            color: var(--text);
+        }
+        
+        .checkout-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Пустая корзина */
+        .empty-cart {
+            text-align: center;
+            padding: 80px 20px;
+            grid-column: 1 / -1;
+        }
+        
+        .empty-cart-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            color: var(--border);
+        }
+        
+        .empty-cart h2 {
+            font-weight: 500;
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+        
+        .empty-cart p {
+            color: var(--text-light);
+            margin-bottom: 30px;
+        }
+        
+        .continue-shopping {
+            display: inline-block;
+            padding: 15px 40px;
+            background: var(--text);
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 14px;
+            border: 1px solid var(--text);
+            transition: all 0.2s;
+        }
+        
+        .continue-shopping:hover {
+            background: white;
+            color: var(--text);
+        }
+        
+        /* Модальное окно оплаты */
+        .payment-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .payment-modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            max-width: 450px;
+            width: 90%;
+            padding: 40px;
+            border: 1px solid var(--border);
+            animation: modalSlideIn 0.3s;
+        }
+        
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .modal-content h3 {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+        
+        .modal-content p {
+            color: var(--text-light);
+            margin-bottom: 25px;
+        }
+        
+        .modal-amount {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .modal-card {
+            background: #f9f9f9;
+            border: 1px solid var(--border);
+            padding: 20px;
+            margin: 20px 0;
+            font-family: monospace;
+            font-size: 18px;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+        
+        .modal-loader {
+            text-align: center;
+            margin: 30px 0;
+            display: none;
+        }
+        
+        .modal-loader.active {
+            display: block;
+        }
+        
+        .loader-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--border);
+            border-top-color: var(--text);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        .modal-btn {
+            flex: 1;
+            padding: 14px;
+            font-family: var(--font-main);
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: white;
+            transition: all 0.2s;
+        }
+        
+        .modal-btn.primary {
+            background: var(--text);
+            color: white;
+            border-color: var(--text);
+        }
+        
+        .modal-btn.primary:hover {
+            background: white;
+            color: var(--text);
+        }
+        
+        .modal-btn:hover {
+            border-color: var(--text);
+        }
+        
+        .modal-success {
+            text-align: center;
+            display: none;
+        }
+        
+        .modal-success.active {
+            display: block;
+        }
+        
+        .success-icon {
+            font-size: 64px;
+            color: #22c55e;
+            margin-bottom: 20px;
+        }
+        
+        /* Рекомендуемые товары */
+        .recommended-section {
+            margin-top: 60px;
+            padding-top: 40px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .recommended-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+        }
+        
+        .recommended-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+        
+        @media (max-width: 1024px) {
+            .recommended-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .recommended-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .recommended-card {
+            text-decoration: none;
+            color: var(--text);
+        }
+        
+        .recommended-image {
+            aspect-ratio: 3 / 4;
+            background: #f6f6f6;
+            border: 1px solid var(--border);
+            margin-bottom: 10px;
+        }
+        
+        .recommended-name {
+            font-weight: 500;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        
+        .recommended-price {
+            font-size: 13px;
+            color: var(--text-light);
+        }
+    </style>
+</head>
+<body>
+    <div class="top-banner">БЕСПЛАТНАЯ ДОСТАВКА ПО РОССИИ ОТ 7000₽</div>
+
+    <header class="site-header">
+        <div class="header-container">
+            <div class="logo">
+                <a href="index.html">TrustTheHood</a>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">Магазин</a></li>
+                    <li><a href="profile.html">Профиль</a></li>
+                    <li><a href="orders.html">Заказы</a></li>
+                    <li><a href="cart.html" class="active">Корзина (<span id="cart-count">0</span>)</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <h1 class="page-title">Корзина</h1>
+            
+            <div class="cart-container" id="cart-container">
+                <!-- Корзина будет загружена через JS -->
+            </div>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>© 2026 TTH STORE</p>
+        </div>
+    </footer>
+
+    <!-- Модальное окно оплаты -->
+    <div class="payment-modal" id="payment-modal">
+        <div class="modal-content">
+            <div id="modal-payment">
+                <h3>Оплата заказа</h3>
+                <p>Введите данные карты для оплаты</p>
+                
+                <div class="modal-amount" id="modal-amount">0 ₽</div>
+                
+                <div class="modal-card">
+                    <div>💳 4242 4242 4242 4242</div>
+                    <div style="font-size:14px; margin-top:10px;">12/25 • 123</div>
+                </div>
+                
+                <div class="modal-loader" id="modal-loader">
+                    <div class="loader-spinner"></div>
+                    <p>Обработка платежа...</p>
+                </div>
+                
+                <div class="modal-actions">
+                    <button class="modal-btn" onclick="closePaymentModal()">Отмена</button>
+                    <button class="modal-btn primary" onclick="processPayment()">Оплатить</button>
+                </div>
+            </div>
+            
+            <div class="modal-success" id="modal-success">
+                <div class="success-icon">✅</div>
+                <h3>Оплата успешна!</h3>
+                <p>Ваш заказ оформлен. Номер заказа: <span id="order-number"></span></p>
+                <p style="font-size:13px; margin:20px 0;">Мы отправили подтверждение на вашу почту</p>
+                <button class="modal-btn primary" onclick="redirectToOrders()">Перейти к заказам</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Константы
+        const USD_TO_RUB = 90; // Курс доллара к рублю (для демо)
+        const FREE_SHIPPING_THRESHOLD_RUB = 10000; // Бесплатная доставка от 10 000 ₽
+        
+        // Доступные промокоды
+        const PROMO_CODES = {
+            'СТАРТ50': 0.5, // 50% скидка
+            'TTH20': 0.2,  // 20% скидка
+            'БЕСПЛАТНО': 'free_shipping' // Бесплатная доставка
+        };
+        
+        let currentPromo = null;
+        let discountAmount = 0;
+        let freeShippingApplied = false;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCartPage();
+            loadRecommendedProducts();
+            
+            // Проверяем авторизацию для оплаты
+            checkAuthBeforeCheckout();
+        });
+        
+        // Конвертация долларов в рубли
+        function usdToRub(usd) {
+            return Math.round(usd * USD_TO_RUB);
+        }
+        
+        // Форматирование рублей
+        function formatRub(amount) {
+            return amount.toLocaleString('ru-RU') + ' ₽';
+        }
+        
+        // Загрузка страницы корзины
+        function loadCartPage() {
+            const container = document.getElementById('cart-container');
+            if (!container) return;
+            
+            const cart = getCart();
+            
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-cart">
+                        <div class="empty-cart-icon">🛒</div>
+                        <h2>Корзина пуста</h2>
+                        <p>Добавьте товары, чтобы оформить заказ</p>
+                        <a href="index.html" class="continue-shopping">Продолжить покупки</a>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Рассчитываем суммы в рублях
+            const subtotalUsd = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const subtotalRub = usdToRub(subtotalUsd);
+            
+            // Применяем скидку по промокоду
+            let discountRub = 0;
+            if (currentPromo && typeof currentPromo === 'number') {
+                discountRub = Math.round(subtotalRub * currentPromo);
+            }
+            
+            const afterDiscountRub = subtotalRub - discountRub;
+            
+            // Рассчитываем доставку
+            let shippingRub = 0;
+            if (!freeShippingApplied) {
+                shippingRub = afterDiscountRub > FREE_SHIPPING_THRESHOLD_RUB ? 0 : 500;
+            }
+            
+            const totalRub = afterDiscountRub + shippingRub;
+            
+            // Прогресс бесплатной доставки
+            const shippingProgress = Math.min(100, (afterDiscountRub / FREE_SHIPPING_THRESHOLD_RUB) * 100);
+            const remainingForFree = Math.max(0, FREE_SHIPPING_THRESHOLD_RUB - afterDiscountRub);
+            
+            let itemsHtml = '';
+            
+            cart.forEach((item, index) => {
+                const itemPriceRub = usdToRub(item.price);
+                const itemTotalRub = itemPriceRub * item.quantity;
+                
+                itemsHtml += `
+                    <div class="cart-item" data-index="${index}">
+                        <div class="cart-item-product">
+                            <div class="cart-item-image">
+                                <img src="https://via.placeholder.com/100x130/f6f6f6/000000?text=${item.name.replace(/ /g, '+')}" alt="${item.name}">
+                            </div>
+                            <div class="cart-item-details">
+                                <div class="cart-item-title">${item.name}</div>
+                                <div class="cart-item-size">${item.size || 'Размер: M'}</div>
+                                <div class="cart-item-price">${formatRub(itemPriceRub)}</div>
+                                <div class="cart-item-price-rub">$${item.price.toFixed(2)}</div>
+                            </div>
+                        </div>
+                        <div class="cart-item-price">${formatRub(itemTotalRub)}</div>
+                        <div class="cart-item-quantity">
+                            <button class="cart-qty-btn minus" onclick="updateQuantity(${index}, ${item.quantity - 1})">−</button>
+                            <input type="text" class="cart-qty-input" value="${item.quantity}" readonly>
+                            <button class="cart-qty-btn plus" onclick="updateQuantity(${index}, ${item.quantity + 1})">+</button>
+                        </div>
+                        <div class="cart-item-remove" onclick="removeItem(${index})">Удалить</div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = `
+                <div>
+                    <div class="cart-header">
+                        <div>Товар</div>
+                        <div>Цена</div>
+                        <div>Количество</div>
+                        <div></div>
+                    </div>
+                    
+                    ${itemsHtml}
+                </div>
+                
+                <div class="cart-sidebar">
+                    <h3 class="sidebar-title">Ваш заказ</h3>
+                    
+                    <div class="promo-section">
+                        <div class="promo-input-group">
+                            <input type="text" class="promo-input" id="promo-input" placeholder="Промокод" value="${currentPromo ? 'Промокод применен' : ''}" ${currentPromo ? 'disabled' : ''}>
+                            <button class="promo-btn" id="promo-btn" onclick="applyPromo()" ${currentPromo ? 'disabled' : ''}>Применить</button>
+                        </div>
+                        <div class="promo-success" id="promo-success">Промокод применен!</div>
+                        <div class="promo-error" id="promo-error"></div>
+                    </div>
+                    
+                    <div class="free-shipping-progress">
+                        <div class="free-shipping-bar" style="width: ${shippingProgress}%"></div>
+                    </div>
+                    <div class="free-shipping-text">
+                        ${remainingForFree > 0 
+                            ? `Добавьте товаров на ${formatRub(remainingForFree)} для бесплатной доставки` 
+                            : '✓ У вас бесплатная доставка!'}
+                    </div>
+                    
+                    <div class="cart-calculations">
+                        <div class="calc-row">
+                            <span>Товары:</span>
+                            <span>${formatRub(subtotalRub)}</span>
+                        </div>
+                        
+                        ${discountRub > 0 ? `
+                            <div class="calc-row" style="color:#22c55e;">
+                                <span>Скидка:</span>
+                                <span>-${formatRub(discountRub)}</span>
+                            </div>
+                        ` : ''}
+                        
+                        <div class="calc-row">
+                            <span>Доставка:</span>
+                            <span>${shippingRub === 0 ? 'Бесплатно' : formatRub(shippingRub)}</span>
+                        </div>
+                        
+                        <div class="calc-row total">
+                            <span>Итого:</span>
+                            <span>${formatRub(totalRub)}</span>
+                        </div>
+                        
+                        <div class="shipping-note">
+                            *Примерно $${(totalRub / USD_TO_RUB).toFixed(2)} по курсу ${USD_TO_RUB} ₽/$
+                        </div>
+                    </div>
+                    
+                    <div class="payment-methods">
+                        <div class="payment-title">Способ оплаты</div>
+                        <div class="payment-options" id="payment-options">
+                            <label class="payment-option selected">
+                                <input type="radio" name="payment" value="card" checked>
+                                <span class="payment-icon">💳</span>
+                                <label>Банковская карта</label>
+                            </label>
+                            <label class="payment-option">
+                                <input type="radio" name="payment" value="sbp">
+                                <span class="payment-icon">📱</span>
+                                <label>СБП</label>
+                            </label>
+                            <label class="payment-option">
+                                <input type="radio" name="payment" value="yandex">
+                                <span class="payment-icon">💰</span>
+                                <label>ЮMoney</label>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <button class="checkout-btn" id="checkout-btn" onclick="openPaymentModal()">
+                        Оформить заказ
+                    </button>
+                </div>
+            `;
+            
+            // Добавляем обработчики для способов оплаты
+            document.querySelectorAll('.payment-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    document.querySelectorAll('.payment-option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    this.classList.add('selected');
+                    this.querySelector('input[type="radio"]').checked = true;
+                });
+            });
+        }
+        
+        // Обновление количества товара
+        function updateQuantity(index, newQuantity) {
+            if (newQuantity < 1) {
+                removeItem(index);
+                return;
+            }
+            
+            if (newQuantity > 10) {
+                showNotification('Максимум 10 единиц товара', 'error');
+                return;
+            }
+            
+            updateCartItemQuantity(index, newQuantity);
+            loadCartPage();
+        }
+        
+        // Удаление товара
+        function removeItem(index) {
+            removeFromCart(index);
+            loadCartPage();
+        }
+        
+        // Применение промокода
+        function applyPromo() {
+            const input = document.getElementById('promo-input');
+            const promoSuccess = document.getElementById('promo-success');
+            const promoError = document.getElementById('promo-error');
+            const promoBtn = document.getElementById('promo-btn');
+            
+            const code = input.value.trim().toUpperCase();
+            
+            if (PROMO_CODES[code]) {
+                const promoValue = PROMO_CODES[code];
+                
+                if (promoValue === 'free_shipping') {
+                    freeShippingApplied = true;
+                    currentPromo = null;
+                    promoSuccess.textContent = 'Бесплатная доставка активирована!';
+                } else {
+                    currentPromo = promoValue;
+                    freeShippingApplied = false;
+                    promoSuccess.textContent = `Скидка ${promoValue * 100}% применена!`;
+                }
+                
+                input.disabled = true;
+                promoBtn.disabled = true;
+                promoSuccess.style.display = 'block';
+                promoError.style.display = 'none';
+                
+                loadCartPage();
+                showNotification('Промокод применен!', 'success');
+            } else {
+                promoError.textContent = 'Неверный промокод';
+                promoError.style.display = 'block';
+                promoSuccess.style.display = 'none';
+            }
+        }
+        
+        // Проверка авторизации перед оформлением
+        function checkAuthBeforeCheckout() {
+            const checkoutBtn = document.getElementById('checkout-btn');
+            if (!checkoutBtn) return;
+            
+            if (!isLoggedIn()) {
+                checkoutBtn.textContent = 'Войдите для оформления';
+                checkoutBtn.disabled = true;
+            }
+        }
+        
+        // Открытие модального окна оплаты
+        function openPaymentModal() {
+            if (!isLoggedIn()) {
+                sessionStorage.setItem('login_redirect', 'cart.html');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            const cart = getCart();
+            if (cart.length === 0) {
+                showNotification('Корзина пуста', 'error');
+                return;
+            }
+            
+            const totals = getCartTotal();
+            const totalRub = usdToRub(totals.total);
+            
+            document.getElementById('modal-amount').textContent = formatRub(totalRub);
+            document.getElementById('payment-modal').classList.add('active');
+        }
+        
+        // Закрытие модального окна
+        function closePaymentModal() {
+            document.getElementById('payment-modal').classList.remove('active');
+            document.getElementById('modal-payment').style.display = 'block';
+            document.getElementById('modal-success').classList.remove('active');
+            document.getElementById('modal-loader').classList.remove('active');
+        }
+        
+        // Обработка платежа (фейковая)
+        function processPayment() {
+            const loader = document.getElementById('modal-loader');
+            const paymentDiv = document.getElementById('modal-payment');
+            
+            loader.classList.add('active');
+            
+            // Имитация обработки платежа
+            setTimeout(() => {
+                loader.classList.remove('active');
+                paymentDiv.style.display = 'none';
+                
+                // Создаем заказ
+                const order = createOrder();
+                
+                if (order) {
+                    document.getElementById('order-number').textContent = order.id;
+                    document.getElementById('modal-success').classList.add('active');
+                    
+                    // Обновляем корзину
+                    loadCartPage();
+                }
+            }, 2000);
+        }
+        
+        // Перенаправление к заказам
+        function redirectToOrders() {
+            window.location.href = 'orders.html';
+        }
+        
+        // Загрузка рекомендуемых товаров
+        function loadRecommendedProducts() {
+            const container = document.getElementById('recommended-grid');
+            if (!container) return;
+            
+            // Получаем случайные товары для рекомендаций
+            const recommended = getFeaturedProducts(4);
+            
+            let html = '';
+            recommended.forEach(product => {
+                const priceRub = usdToRub(product.price);
+                
+                html += `
+                    <a href="product.html?id=${product.id}" class="recommended-card">
+                        <div class="recommended-image">
+                            <img src="https://via.placeholder.com/200x250/f6f6f6/000000?text=${product.name.replace(/ /g, '+')}" style="width:100%; height:100%; object-fit:cover;">
+                        </div>
+                        <div class="recommended-name">${product.name}</div>
+                        <div class="recommended-price">${formatRub(priceRub)}</div>
+                    </a>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrustTheHood / Аккаунт</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <style>
+        .auth-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .auth-tab {
+            padding: 15px 30px;
+            cursor: pointer;
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid transparent;
+        }
+        
+        .auth-tab.active {
+            border-bottom-color: var(--text);
+        }
+        
+        .auth-box {
+            max-width: 400px;
+            margin: 0 auto;
+            text-align: left;
+        }
+        
+        .auth-form {
+            display: none;
+        }
+        
+        .auth-form.active {
+            display: block;
+        }
+        
+        .password-requirements {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-top: 5px;
+            padding-left: 10px;
+        }
+        
+        .password-requirements li {
+            margin-bottom: 3px;
+        }
+        
+        .password-requirements li.valid {
+            color: #22c55e;
+        }
+        
+        .forgot-password {
+            text-align: right;
+            margin: 15px 0;
+            font-size: 13px;
+        }
+        
+        .forgot-password a {
+            color: var(--text-light);
+            text-decoration: underline;
+        }
+        
+        .auth-divider {
+            display: flex;
+            align-items: center;
+            margin: 30px 0 20px;
+        }
+        
+        .auth-divider::before,
+        .auth-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+        
+        .auth-divider span {
+            padding: 0 15px;
+            font-size: 12px;
+            color: var(--text-light);
+            text-transform: uppercase;
+        }
+        
+        .social-auth {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .social-btn {
+            width: 50px;
+            height: 50px;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .social-btn:hover {
+            border-color: var(--text);
+            background: var(--text);
+            color: var(--bg);
+        }
+        
+        .guest-continue {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 13px;
+        }
+        
+        .guest-continue a {
+            color: var(--text);
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-banner">Бесплатная доставка от 7000₽</div>
+
+    <header class="site-header">
+        <div class="header-container">
+            <div class="logo">
+                <a href="index.html">TrustTheHood</a>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">Магазин</a></li>
+                    <li><a href="profile.html">Профиль</a></li>
+                    <li><a href="orders.html">Заказы</a></li>
+                    <li><a href="cart.html">Корзина(<span id="cart-count">0</span>)</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="auth-tabs">
+                <div class="auth-tab active" id="login-tab">Войти</div>
+                <div class="auth-tab" id="register-tab">Создать аккаунт</div>
+            </div>
+            
+            <div class="auth-box">
+                <!-- Форма входа -->
+                <div class="auth-form active" id="login-form">
+                    <form id="login-form-data">
+                        <div class="form-group">
+                            <label for="login-email">Email</label>
+                            <input type="email" id="login-email" required placeholder="Ваш@email.com">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="login-password">Пароль</label>
+                            <input type="password" id="login-password" required placeholder="••••••••">
+                        </div>
+                        
+                        <div class="forgot-password">
+                            <a href="#">Забыли пароль?</a>
+                        </div>
+                        
+                        <button type="submit" class="btn">Войти</button>
+                    </form>
+                    
+                    <div class="auth-divider">
+                        <span>или</span>
+                    </div>
+                    
+                    <div class="social-auth">
+                        <div class="social-btn">G</div>
+                        <div class="social-btn">Tg</div>
+                        <div class="social-btn">VK</div>
+                    </div>
+                    
+                    <div class="guest-continue">
+                        <a href="index.html">Продолжить как гость →</a>
+                    </div>
+                </div>
+                
+                <!-- Форма регистрации -->
+                <div class="auth-form" id="register-form">
+                    <form id="register-form-data">
+                        <div class="form-group">
+                            <label for="register-name">Полное имя</label>
+                            <input type="text" id="register-name" required placeholder="Михаил Михайлов">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="register-email">Email</label>
+                            <input type="email" id="register-email" required placeholder="Ваш@email.com">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="register-password">Пароль</label>
+                            <input type="password" id="register-password" required placeholder="Придумайте пароль">
+                            <ul class="password-requirements" id="password-requirements">
+                                <li id="req-length">Должен содержать не менее 8 символов</li>
+                                <li id="req-number">Содержит цифры</li>
+                                <li id="req-letter">Содержит буквы</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="register-confirm">Confirm Password</label>
+                            <input type="password" id="register-confirm" required placeholder="Подтвердите пароль">
+                        </div>
+                        
+                        <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="newsletter" style="width: auto;">
+                            <label for="newsletter" style="margin:0; font-size:13px;">Даю соглашение на получение рекламных рассылок</label>
+                        </div>
+                        
+                        <button type="submit" class="btn">Создать аккаунт</button>
+                    </form>
+                    
+                    <div class="auth-divider">
+                        <span>or</span>
+                    </div>
+                    
+                    <div class="social-auth">
+                        <div class="social-btn">G</div>
+                        <div class="social-btn">Tg</div>
+                        <div class="social-btn">VK</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>© 2026 TTH STORE</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            initAuth();
+            setupPasswordValidation();
+            
+            // Проверка redirect параметра
+            const urlParams = new URLSearchParams(window.location.search);
+            const redirect = urlParams.get('redirect');
+            if (redirect) {
+                sessionStorage.setItem('login_redirect', redirect);
+            }
+        });
+        
+        function setupPasswordValidation() {
+            const passwordInput = document.getElementById('register-password');
+            if (!passwordInput) return;
+            
+            passwordInput.addEventListener('input', function() {
+                const password = this.value;
+                
+                // Проверка длины
+                const reqLength = document.getElementById('req-length');
+                if (password.length >= 8) {
+                    reqLength.classList.add('valid');
+                } else {
+                    reqLength.classList.remove('valid');
+                }
+                
+                // Проверка наличия цифры
+                const reqNumber = document.getElementById('req-number');
+                if (/\d/.test(password)) {
+                    reqNumber.classList.add('valid');
+                } else {
+                    reqNumber.classList.remove('valid');
+                }
+                
+                // Проверка наличия буквы
+                const reqLetter = document.getElementById('req-letter');
+                if (/[a-zA-Z]/.test(password)) {
+                    reqLetter.classList.add('valid');
+                } else {
+                    reqLetter.classList.remove('valid');
+                }
+            });
+            
+            // Проверка подтверждения пароля
+            const confirmInput = document.getElementById('register-confirm');
+            confirmInput.addEventListener('input', function() {
+                const password = document.getElementById('register-password').value;
+                const confirm = this.value;
+                
+                if (confirm && password !== confirm) {
+                    this.style.borderColor = '#ef4444';
+                } else if (confirm && password === confirm) {
+                    this.style.borderColor = '#22c55e';
+                } else {
+                    this.style.borderColor = '';
+                }
+            });
+        }
+        
+        // Переопределяем функцию initAuth из script.js
+        function initAuth() {
+            const loginTab = document.getElementById('login-tab');
+            const registerTab = document.getElementById('register-tab');
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            
+            if (loginTab && registerTab && loginForm && registerForm) {
+                loginTab.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    loginTab.classList.add('active');
+                    registerTab.classList.remove('active');
+                    loginForm.classList.add('active');
+                    registerForm.classList.remove('active');
+                });
+                
+                registerTab.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    registerTab.classList.add('active');
+                    loginTab.classList.remove('active');
+                    registerForm.classList.add('active');
+                    loginForm.classList.remove('active');
+                });
+                
+                // Обработка формы входа
+                document.getElementById('login-form-data').addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const email = document.getElementById('login-email').value;
+                    
+                    // Сохраняем пользователя
+                    localStorage.setItem('tth_user', JSON.stringify({ 
+                        name: email.split('@')[0], 
+                        email: email 
+                    }));
+                    
+                    alert('Вход выполнен успешно!');
+                    
+                    const redirect = sessionStorage.getItem('login_redirect');
+                    sessionStorage.removeItem('login_redirect');
+                    window.location.href = redirect || 'profile.html';
+                });
+                
+                // Обработка формы регистрации
+                document.getElementById('register-form-data').addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const name = document.getElementById('register-name').value;
+                    const email = document.getElementById('register-email').value;
+                    const password = document.getElementById('register-password').value;
+                    const confirm = document.getElementById('register-confirm').value;
+                    
+                    // Простая валидация
+                    if (password !== confirm) {
+                        alert('Пароли не совпадают');
+                        return;
+                    }
+                    
+                    if (password.length < 8) {
+                        alert('Пароль должен содержать не менее 8 символов');
+                        return;
+                    }
+                    
+                    // Сохраняем пользователя
+                    localStorage.setItem('tth_user', JSON.stringify({ name, email }));
+                    
+                    alert('Аккаунт успешно создан!');
+                    
+                    const redirect = sessionStorage.getItem('login_redirect');
+                    sessionStorage.removeItem('login_redirect');
+                    window.location.href = redirect || 'profile.html';
+                });
+            }
+        }
+    </script>
+</body>
+</html>
