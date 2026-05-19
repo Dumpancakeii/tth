@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrustTheHood — Админка</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    body { padding: 120px 32px 80px; background: #f5f5f5; }
+    .admin-header { margin-bottom: 48px; }
+    .admin-header h1 { font-size: 28px; margin-bottom: 8px; }
+    .admin-header p { font-size: 13px; color: #777; }
+    .admin-tabs { display: flex; gap: 4px; margin-bottom: 32px; flex-wrap: wrap; }
+    .admin-tab { padding: 10px 24px; border: 1px solid #111; background: transparent; font-family: 'Inter', sans-serif; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; color: #111; }
+    .admin-tab.active { background: #111; color: #fff; }
+    .admin-tab:hover:not(.active) { background: #111; color: #fff; }
+    .admin-panel { display: none; }
+    .admin-panel.active { display: block; }
+    .admin-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
+    .admin-card { background: #fff; padding: 20px; border: 1px solid #e0e0e0; }
+    .admin-card h3 { font-size: 13px; margin-bottom: 8px; }
+    .admin-card p { font-size: 11px; color: #777; margin-bottom: 4px; line-height: 1.5; }
+    .admin-card-actions { display: flex; gap: 8px; margin-top: 12px; }
+    .admin-btn { padding: 6px 16px; border: 1px solid #111; background: transparent; font-family: 'Inter', sans-serif; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; color: #111; transition: all 0.2s; }
+    .admin-btn:hover { background: #111; color: #fff; }
+    .admin-btn.danger { border-color: #c0392b; color: #c0392b; }
+    .admin-btn.danger:hover { background: #c0392b; color: #fff; }
+    .admin-btn.success { border-color: #2e7d32; color: #2e7d32; }
+    .admin-btn.success:hover { background: #2e7d32; color: #fff; }
+    .admin-email-list { background: #fff; padding: 24px; border: 1px solid #e0e0e0; max-width: 600px; }
+    .admin-email-item { font-size: 13px; padding: 6px 0; border-bottom: 1px solid #f0f0f0; font-family: 'Courier New', monospace; }
+    .admin-modal { display: none; position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; padding: 24px; }
+    .admin-modal.active { display: flex; }
+    .admin-modal-inner { background: #fff; padding: 40px; max-width: 520px; width: 100%; position: relative; max-height: 80vh; overflow-y: auto; }
+    .admin-modal-close { position: absolute; top: 16px; right: 20px; background: none; border: none; font-size: 20px; cursor: pointer; color: #777; font-family: inherit; }
+    .admin-form label { display: block; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #777; margin-top: 16px; margin-bottom: 4px; font-weight: 500; }
+    .admin-form input, .admin-form select, .admin-form textarea { width: 100%; height: 36px; padding: 0 8px; border: 1px solid #e0e0e0; font-family: 'Inter', sans-serif; font-size: 13px; color: #111; outline: none; }
+    .admin-form input:focus, .admin-form select:focus { border-color: #111; }
+    .admin-form textarea { height: 80px; padding: 8px; resize: vertical; }
+    .admin-modal-title { font-size: 14px; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 24px; }
+    .admin-empty { font-size: 13px; color: #777; padding: 40px; text-align: center; }
+    .admin-notice { font-size: 11px; color: #c0392b; margin-top: 16px; }
+    .admin-export-btn { margin-top: 16px; }
+  </style>
+</head>
+<body>
+  <div class="admin-header">
+    <h1>Админка</h1>
+    <p>Управление товарами и подписчиками</p>
+  </div>
+
+  <div class="admin-tabs">
+    <button class="admin-tab active" data-tab="products">Товары</button>
+    <button class="admin-tab" data-tab="emails">Подписчики</button>
+  </div>
+
+  <!-- TAB: Товары -->
+  <div class="admin-panel active" id="tab-products">
+    <div style="margin-bottom:24px;">
+      <button class="admin-btn success" id="addProductBtn">+ Добавить товар</button>
+      <button class="admin-btn" id="reloadFromFileBtn">Загрузить из shop.html</button>
+    </div>
+    <div class="admin-grid" id="productsGrid"></div>
+    <div class="admin-empty" id="productsEmpty">Нет товаров. Нажмите "Загрузить из shop.html"</div>
+  </div>
+
+  <!-- TAB: Подписчики -->
+  <div class="admin-panel" id="tab-emails">
+    <div class="admin-email-list" id="emailsList">
+      <div class="admin-empty">Нет подписчиков</div>
+    </div>
+    <button class="admin-btn admin-export-btn" id="copyEmailsBtn">Копировать все email</button>
+  </div>
+
+  <!-- MODAL: Редактирование товара -->
+  <div class="admin-modal" id="productModal">
+    <div class="admin-modal-inner">
+      <button class="admin-modal-close" id="productModalClose">✕</button>
+      <div class="admin-modal-title" id="productModalTitle">Новый товар</div>
+      <div class="admin-form">
+        <label>Название</label>
+        <input type="text" id="editName">
+        <label>Цена (только цифры)</label>
+        <input type="text" id="editPrice">
+        <label>Цвет (на английском, e.g. Black, Blue, White)</label>
+        <input type="text" id="editColor">
+        <label>Категория</label>
+        <select id="editCategory">
+          <option value="верх">Верх</option>
+          <option value="низ">Низ</option>
+          <option value="обувь">Обувь</option>
+          <option value="аксессуары">Аксессуары</option>
+          <option value="ковры">Ковры</option>
+        </select>
+        <label>Статус</label>
+        <select id="editSoldOut">
+          <option value="false">В наличии</option>
+          <option value="true">Продано</option>
+        </select>
+        <label>Артикул (SKU)</label>
+        <input type="text" id="editSku">
+        <label>data-id (латиница, без пробелов)</label>
+        <input type="text" id="editDataId">
+        <div style="margin-top: 24px; display: flex; gap: 12px;">
+          <button class="admin-btn success" id="saveProductBtn">Сохранить</button>
+          <button class="admin-btn" id="cancelProductBtn">Отмена</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>
