@@ -168,33 +168,129 @@ document.addEventListener('DOMContentLoaded', () => {
       });
   }
 
-  // Render emails
+  // Нормализация записи email (поддержка старого формата — строка, и нового — объект)
+  function normalizeEmailEntry(entry) {
+    if (typeof entry === 'string') {
+      return { email: entry, date: '—', time: '—', timestamp: '', page: '—' };
+    }
+    return entry;
+  }
+
+  // Получить все email-записи
+  function getEmails() {
+    try {
+      return (JSON.parse(localStorage.getItem(EMAILS_KEY)) || []).map(normalizeEmailEntry);
+    } catch {
+      return [];
+    }
+  }
+
+  // Render emails — таблица с датой, временем, страницей
   function renderEmails() {
     if (!emailsList) return;
-    let emails = [];
-    try {
-      emails = JSON.parse(localStorage.getItem(EMAILS_KEY)) || [];
-    } catch {}
+    const emails = getEmails();
+
+    // Обновить счётчик
+    const counter = document.getElementById('emailsCounter');
+    if (counter) counter.textContent = emails.length;
+
     if (emails.length === 0) {
       emailsList.innerHTML = '<div class="admin-empty">Нет подписчиков</div>';
       return;
     }
-    emailsList.innerHTML = emails.map((email, i) =>
-      `<div class="admin-email-item">${i + 1}. ${email}</div>`
-    ).join('');
+
+    emailsList.innerHTML = `
+      <table class="emails-table">
+        <thead>
+          <tr>
+            <th>№</th>
+            <th>Email</th>
+            <th>Дата</th>
+            <th>Время</th>
+            <th>Страница</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          ${emails.map((entry, i) => `
+            <tr>
+              <td>${i + 1}</td>
+              <td class="email-cell">${entry.email}</td>
+              <td>${entry.date}</td>
+              <td>${entry.time}</td>
+              <td>${entry.page}</td>
+              <td><button class="admin-btn danger btn-sm" data-remove-email="${i}">✕</button></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+
+    // Кнопки удаления отдельных записей
+    emailsList.querySelectorAll('[data-remove-email]').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const idx = parseInt(this.dataset.removeEmail);
+        let raw = [];
+        try { raw = JSON.parse(localStorage.getItem(EMAILS_KEY)) || []; } catch {}
+        raw.splice(idx, 1);
+        localStorage.setItem(EMAILS_KEY, JSON.stringify(raw));
+        renderEmails();
+      });
+    });
   }
 
-  // Copy emails
+  // Copy emails (только адреса, по одному на строку)
   function copyEmails() {
-    let emails = [];
-    try {
-      emails = JSON.parse(localStorage.getItem(EMAILS_KEY)) || [];
-    } catch {}
-    navigator.clipboard.writeText(emails.join('\n')).then(() => {
-      alert('Email скопированы');
+    const emails = getEmails();
+    const text = emails.map(e => e.email).join('\n');
+    navigator.clipboard.writeText(text).then(() => {
+      alert('Email скопированы (' + emails.length + ' шт.)');
     }).catch(() => {
       alert('Не удалось скопировать');
     });
+  }
+
+  // Скачать CSV
+  function downloadCSV() {
+    const emails = getEmails();
+    if (emails.length === 0) { alert('Нет подписчиков для экспорта'); return; }
+    const BOM = '\uFEFF'; // для корректного отображения кириллицы в Excel
+    const header = 'Email,Дата,Время,Страница';
+    const rows = emails.map(e =>
+      `"${e.email}","${e.date}","${e.time}","${e.page}"`
+    );
+    const csv = BOM + header + '\n' + rows.join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'trustthehood_emails_' + new Date().toISOString().slice(0,10) + '.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // Скачать JSON
+  function downloadJSON() {
+    const emails = getEmails();
+    if (emails.length === 0) { alert('Нет подписчиков для экспорта'); return; }
+    const json = JSON.stringify(emails, null, 2);
+    const blob = new Blob([json], { type: 'application/json;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'trustthehood_emails_' + new Date().toISOString().slice(0,10) + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // Очистить все email
+  function clearEmails() {
+    const emails = getEmails();
+    if (emails.length === 0) { alert('Список уже пуст'); return; }
+    if (confirm('Удалить всех ' + emails.length + ' подписчиков? Это действие нельзя отменить.')) {
+      localStorage.removeItem(EMAILS_KEY);
+      renderEmails();
+    }
   }
 
   // Tabs
@@ -215,6 +311,9 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('cancelProductBtn')?.addEventListener('click', () => productModal.classList.remove('active'));
   document.getElementById('productModalClose')?.addEventListener('click', () => productModal.classList.remove('active'));
   document.getElementById('copyEmailsBtn')?.addEventListener('click', copyEmails);
+  document.getElementById('downloadCsvBtn')?.addEventListener('click', downloadCSV);
+  document.getElementById('downloadJsonBtn')?.addEventListener('click', downloadJSON);
+  document.getElementById('clearEmailsBtn')?.addEventListener('click', clearEmails);
 
   // Init
   loadProducts();
