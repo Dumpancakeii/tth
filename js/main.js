@@ -810,8 +810,20 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       emails = JSON.parse(localStorage.getItem(EMAILS_KEY)) || [];
     } catch {}
-    if (!emails.includes(email)) {
-      emails.push(email);
+    // Проверяем, нет ли уже такого email
+    const alreadyExists = emails.some(function(entry) {
+      return (typeof entry === 'string' ? entry : entry.email) === email;
+    });
+    if (!alreadyExists) {
+      const now = new Date();
+      const entry = {
+        email: email,
+        date: now.toLocaleDateString('ru-RU'),
+        time: now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
+        timestamp: now.toISOString(),
+        page: window.location.pathname.split('/').pop() || 'index.html'
+      };
+      emails.push(entry);
       localStorage.setItem(EMAILS_KEY, JSON.stringify(emails));
     }
   }
