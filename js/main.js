@@ -562,21 +562,18 @@ document.addEventListener('DOMContentLoaded', () => {
   function openNewsletterModal() { if (newsletterModal) { newsletterModal.classList.add('active'); document.body.style.overflow = 'hidden'; } }
   function closeNewsletterModal() { if (newsletterModal) { newsletterModal.classList.remove('active'); document.body.style.overflow = ''; } }
 
-  if (newsletterBtn) {
-    newsletterBtn.addEventListener('click', function(e) {
-      e.preventDefault();
-      const email = newsletterEmail ? newsletterEmail.value.trim() : '';
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!email || !emailRegex.test(email)) { 
-        if (newsletterError) newsletterError.classList.add('show'); 
-        return; 
-      }
-      if (newsletterError) newsletterError.classList.remove('show');
-      if (newsletterEmail) newsletterEmail.value = '';
-      openNewsletterModal();
-    });
+  // Строгая валидация email: требует реальный домен с TLD минимум 2 символа
+  const emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+
+  function isValidEmail(email) {
+    if (!email || !emailRegex.test(email)) return false;
+    // Запрещаем localhost и IP-адреса как домен
+    const domain = email.split('@')[1] || '';
+    if (domain === 'localhost') return false;
+    if (/^\d+\.\d+\.\d+\.\d+$/.test(domain)) return false;
+    return true;
   }
-  if (newsletterEmail) newsletterEmail.addEventListener('input', function() { if (this.value.trim()) { if (newsletterError) newsletterError.classList.remove('show'); } });
+
   if (newsletterModalClose) newsletterModalClose.addEventListener('click', closeNewsletterModal);
   if (newsletterModal) newsletterModal.addEventListener('click', function(e) { if (e.target === newsletterModal) closeNewsletterModal(); });
 
@@ -699,8 +696,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const filterColor = document.getElementById('filterColor');
   const filterPrice = document.getElementById('filterPrice');
 
+  // Определяем, находимся ли мы на странице магазина
+  const isShopPage = window.location.pathname.endsWith('shop.html');
+
   function applyFilters() {
     const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
+
+    // Если мы НЕ на shop.html и есть поисковый запрос — редиректим на магазин
+    if (!isShopPage && query !== '') {
+      window.location.href = 'shop.html?search=' + encodeURIComponent(query);
+      return;
+    }
+
     const category = filterCategory ? filterCategory.value : '';
     const priceVal = filterPrice ? filterPrice.value : '';
     const colorEl = filterColor ? filterColor.querySelector('.filter-color-btn.active') : null;
@@ -752,6 +759,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Если мы на shop.html — читаем параметр ?search= из URL и применяем
+  if (isShopPage) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchQuery = urlParams.get('search');
+    if (searchQuery && searchInput) {
+      searchInput.value = searchQuery;
+      applyFilters();
+    }
+  }
+
   // ---------- TOAST NOTIFICATION ----------
   function showToast(message) {
     let toast = document.getElementById('toast-notification');
@@ -779,23 +796,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Update newsletter handler to save email
+  // Единственный обработчик кнопки рассылки — со строгой валидацией и сохранением
   if (newsletterBtn) {
     newsletterBtn.addEventListener('click', function(e) {
       e.preventDefault();
       const email = newsletterEmail ? newsletterEmail.value.trim() : '';
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!email || !emailRegex.test(email)) { 
-        if (newsletterError) newsletterError.classList.add('show'); 
-        return; 
+      if (!isValidEmail(email)) {
+        if (newsletterError) newsletterError.classList.add('show');
+        return;
       }
       if (newsletterError) newsletterError.classList.remove('show');
-      // Save email to localStorage
       saveEmailToLocalStorage(email);
       if (newsletterEmail) newsletterEmail.value = '';
       openNewsletterModal();
     });
-    if (newsletterEmail) newsletterEmail.addEventListener('input', function() { if (this.value.trim()) { if (newsletterError) newsletterError.classList.remove('show'); } });
+    if (newsletterEmail) {
+      newsletterEmail.addEventListener('input', function() {
+        if (this.value.trim()) {
+          if (newsletterError) newsletterError.classList.remove('show');
+        }
+      });
+    }
   }
 
   // ---------- INIT ----------
