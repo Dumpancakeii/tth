@@ -612,26 +612,67 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   applyShopFilter();
 
-  // ---------- PRODUCT GALLERY DOTS ----------
+  // ---------- PRODUCT GALLERY DOTS + TOUCH SWIPE ----------
+
+  // Вспомогательная функция: показать нужный слайд и обновить точки
+  function showGallerySlide(imageContainer, index) {
+    const images = imageContainer.querySelectorAll('.gallery-img');
+    const dots = imageContainer.querySelectorAll('.gallery-dot');
+    if (images.length === 0) return;
+    const total = images.length;
+    const i = ((index % total) + total) % total; // зацикливание
+    images.forEach((img, idx) => { img.style.opacity = idx === i ? '1' : '0'; });
+    dots.forEach((dot, idx) => {
+      dot.style.background = idx === i ? 'rgba(17,17,17,0.8)' : 'rgba(17,17,17,0.3)';
+    });
+    imageContainer.dataset.currentSlide = i;
+  }
+
   document.querySelectorAll('.gallery-dots').forEach(dotsContainer => {
     const dots = dotsContainer.querySelectorAll('.gallery-dot');
     const imageContainer = dotsContainer.closest('.product-image');
     const images = imageContainer ? imageContainer.querySelectorAll('.gallery-img') : [];
     if (images.length === 0) return;
 
-    images.forEach((img, i) => { img.style.opacity = i === 0 ? '1' : '0'; });
+    // Инициализация: показать первый слайд
+    showGallerySlide(imageContainer, 0);
 
+    // Десктоп: наведение на точки
     dots.forEach((dot, index) => {
       dot.addEventListener('mouseenter', () => {
-        images.forEach((img, i) => { img.style.opacity = i === index ? '1' : '0'; });
+        showGallerySlide(imageContainer, index);
       });
     });
 
-    if (imageContainer) {
-      imageContainer.addEventListener('mouseleave', () => {
-        images.forEach((img, i) => { img.style.opacity = i === 0 ? '1' : '0'; });
-      });
-    }
+    // Десктоп: уход курсора — вернуть первый слайд
+    imageContainer.addEventListener('mouseleave', () => {
+      showGallerySlide(imageContainer, 0);
+    });
+
+    // Мобильный: свайп
+    let touchStartX = 0;
+    let touchStartY = 0;
+
+    imageContainer.addEventListener('touchstart', (e) => {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+
+    imageContainer.addEventListener('touchend', (e) => {
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      const dy = e.changedTouches[0].clientY - touchStartY;
+      // Свайп только если горизонтальное движение больше вертикального и > 30px
+      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 30) {
+        const current = parseInt(imageContainer.dataset.currentSlide || '0', 10);
+        if (dx < 0) {
+          // Свайп влево → следующая
+          showGallerySlide(imageContainer, current + 1);
+        } else {
+          // Свайп вправо → предыдущая
+          showGallerySlide(imageContainer, current - 1);
+        }
+      }
+    }, { passive: true });
   });
 
   // ---------- STORAGE SYNC (cross-tab) ----------
