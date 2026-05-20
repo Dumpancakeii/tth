@@ -1079,14 +1079,7 @@ footer {
 }
 
 .mobile-nav .close-btn {
-  position: absolute;
-  top: 24px;
-  right: 32px;
-  font-size: 24px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #111;
+  display: none;
 }
 
 @media (max-width: 768px) {
@@ -1736,11 +1729,6 @@ body.has-announcement .section:first-of-type {
   .footer-bottom {
     flex-direction: column;
     text-align: center;
-  }
-
-  /* Мобильная навигация */
-  .mobile-nav .close-btn {
-    right: 24px;
   }
 
   /* Секции: уменьшить боковые паддинги */
