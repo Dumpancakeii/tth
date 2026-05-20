@@ -1080,11 +1080,30 @@ footer {
 
 .mobile-nav .close-btn {
   display: none;
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #777;
+  font-family: inherit;
+  width: 36px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+  z-index: 10;
+}
+
+.mobile-nav .close-btn:hover {
+  color: #111;
 }
 
 @media (max-width: 768px) {
   .mobile-nav .close-btn {
-    right: 24px;
+    display: flex;
   }
 }
 
