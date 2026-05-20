@@ -553,9 +553,10 @@ document.addEventListener('DOMContentLoaded', () => {
   if (privacyModal) privacyModal.addEventListener('click', function(e) { if (e.target === privacyModal) closePrivacyModal(); });
 
   // ---------- NEWSLETTER SUBSCRIPTION ----------
-  const newsletterEmail = document.getElementById('newsletterEmail');
-  const newsletterBtn = document.getElementById('newsletterBtn');
-  const newsletterError = document.getElementById('newsletterError');
+  // Берём элементы из футера (не из filter-panel), чтобы избежать конфликта дублирующихся id
+  const newsletterEmail = document.querySelector('footer #newsletterEmail') || document.getElementById('newsletterEmail');
+  const newsletterBtn = document.querySelector('footer #newsletterBtn') || document.getElementById('newsletterBtn');
+  const newsletterError = document.querySelector('footer #newsletterError') || document.getElementById('newsletterError');
   const newsletterModal = document.getElementById('newsletterModal');
   const newsletterModalClose = document.getElementById('newsletterModalClose');
 
