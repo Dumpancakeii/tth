@@ -375,7 +375,11 @@ header nav a:hover {
   top: 24px;
 }
 
-/* Активное состояние — крестик */
+/* Активное состояние — крестик: скрыть бургер, чтобы не было двух крестиков */
+.burger.active {
+  display: none;
+}
+
 .burger.active .burger-line:nth-child(1) {
   top: 17px;
   transform: rotate(45deg);
