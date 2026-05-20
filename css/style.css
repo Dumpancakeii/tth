@@ -510,6 +510,7 @@ header nav a:hover {
   overflow: hidden;
   margin-bottom: 12px;
   background: #f5f5f5;
+  touch-action: pan-y;
 }
 
 .product-image img {
@@ -640,7 +641,8 @@ header nav a:hover {
   height: 70vh;
   position: relative;
   overflow: hidden;
-  width: 100%;
+  width: 100vw;
+  margin-left: calc(-1 * (100vw - 100%) / 2);
 }
 
 .editorial-banner img {
