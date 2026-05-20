@@ -345,52 +345,54 @@ header nav a:hover {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 10px 8px;
-  z-index: 1001;
+  padding: 0;
+  z-index: 1002;
   position: relative;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
 }
 
 .burger-line {
   display: block;
-  width: 24px;
+  width: 22px;
   height: 2px;
   background: #111;
   position: absolute;
-  left: 6px;
-  transition: transform 0.25s ease, opacity 0.25s ease, top 0.25s ease;
+  left: 11px;
+  transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1),
+              opacity 0.2s ease,
+              top 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  border-radius: 1px;
 }
 
 .burger-line:nth-child(1) {
-  top: 10px;
+  top: 14px;
 }
 
 .burger-line:nth-child(2) {
-  top: 17px;
+  top: 21px;
 }
 
 .burger-line:nth-child(3) {
-  top: 24px;
+  top: 28px;
 }
 
-/* Активное состояние — крестик: скрыть бургер, чтобы не было двух крестиков */
-.burger.active {
-  display: none;
-}
-
+/* Активное состояние — анимация в крестик */
 .burger.active .burger-line:nth-child(1) {
-  top: 17px;
+  top: 21px;
   transform: rotate(45deg);
 }
 
 .burger.active .burger-line:nth-child(2) {
   opacity: 0;
+  transform: scaleX(0);
 }
 
 .burger.active .burger-line:nth-child(3) {
-  top: 17px;
+  top: 21px;
   transform: rotate(-45deg);
 }
 
@@ -1082,33 +1084,9 @@ footer {
   color: #111;
 }
 
+/* close-btn скрыт — закрытие через бургер-крестик */
 .mobile-nav .close-btn {
-  display: none;
-  position: absolute;
-  top: 24px;
-  right: 24px;
-  background: none;
-  border: none;
-  font-size: 20px;
-  cursor: pointer;
-  color: #777;
-  font-family: inherit;
-  width: 36px;
-  height: 36px;
-  align-items: center;
-  justify-content: center;
-  transition: color 0.2s;
-  z-index: 10;
-}
-
-.mobile-nav .close-btn:hover {
-  color: #111;
-}
-
-@media (max-width: 768px) {
-  .mobile-nav .close-btn {
-    display: flex;
-  }
+  display: none !important;
 }
 
 /* ---------- ANNOUNCEMENT BAR ADJUSTMENT ---------- */
@@ -1673,7 +1651,7 @@ body.has-announcement .section:first-of-type {
   }
 
   .burger {
-    display: block;
+    display: flex;
   }
 
   /* Поиск: сжать, но оставить видимым */
