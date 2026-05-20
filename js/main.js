@@ -745,8 +745,27 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Поиск по Enter (важно для мобильных устройств)
+  function handleSearchSubmit() {
+    const query = searchInput ? searchInput.value.trim() : '';
+    if (query === '') return;
+    if (!isShopPage) {
+      window.location.href = 'shop.html?search=' + encodeURIComponent(query);
+    } else {
+      applyFilters();
+    }
+  }
+
   // Attach filter events
-  if (searchInput) searchInput.addEventListener('input', applyFilters);
+  if (searchInput) {
+    searchInput.addEventListener('input', applyFilters);
+    searchInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleSearchSubmit();
+      }
+    });
+  }
   if (filterCategory) filterCategory.addEventListener('change', applyFilters);
   if (filterPrice) filterPrice.addEventListener('change', applyFilters);
   if (filterColor) {
@@ -797,26 +816,36 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Единственный обработчик кнопки рассылки — со строгой валидацией и сохранением
+  function handleNewsletterSubmit() {
+    const email = newsletterEmail ? newsletterEmail.value.trim() : '';
+    if (!isValidEmail(email)) {
+      if (newsletterError) newsletterError.classList.add('show');
+      return;
+    }
+    if (newsletterError) newsletterError.classList.remove('show');
+    saveEmailToLocalStorage(email);
+    if (newsletterEmail) newsletterEmail.value = '';
+    openNewsletterModal();
+  }
+
   if (newsletterBtn) {
     newsletterBtn.addEventListener('click', function(e) {
       e.preventDefault();
-      const email = newsletterEmail ? newsletterEmail.value.trim() : '';
-      if (!isValidEmail(email)) {
-        if (newsletterError) newsletterError.classList.add('show');
-        return;
-      }
-      if (newsletterError) newsletterError.classList.remove('show');
-      saveEmailToLocalStorage(email);
-      if (newsletterEmail) newsletterEmail.value = '';
-      openNewsletterModal();
+      handleNewsletterSubmit();
     });
-    if (newsletterEmail) {
-      newsletterEmail.addEventListener('input', function() {
-        if (this.value.trim()) {
-          if (newsletterError) newsletterError.classList.remove('show');
-        }
-      });
-    }
+  }
+  if (newsletterEmail) {
+    newsletterEmail.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleNewsletterSubmit();
+      }
+    });
+    newsletterEmail.addEventListener('input', function() {
+      if (this.value.trim()) {
+        if (newsletterError) newsletterError.classList.remove('show');
+      }
+    });
   }
 
   // ---------- INIT ----------
