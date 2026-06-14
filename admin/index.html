@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrustTheHood — Админка</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    * { box-sizing: border-box; }
+    body { padding: 32px; background: #f5f5f5; font-family: 'Inter', sans-serif; }
+    .admin-header { margin-bottom: 32px; }
+    .admin-header h1 { font-size: 24px; margin-bottom: 4px; }
+    .admin-header p { font-size: 12px; color: #777; }
+    .login-screen { max-width: 360px; margin: 120px auto; text-align: center; }
+    .login-screen h2 { font-size: 20px; margin-bottom: 16px; }
+    .login-screen input { width: 100%; padding: 12px; border: 1px solid #ddd; font-size: 14px; margin-bottom: 12px; font-family: inherit; }
+    .login-screen button { width: 100%; padding: 12px; background: #111; color: #fff; border: none; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; font-family: inherit; }
+    .login-error { color: #e53935; font-size: 12px; margin-bottom: 8px; display: none; }
+    .admin-tabs { display: flex; gap: 4px; margin-bottom: 24px; flex-wrap: wrap; }
+    .admin-tab { padding: 10px 20px; border: 1px solid #111; background: transparent; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; color: #111; font-family: inherit; }
+    .admin-tab.active { background: #111; color: #fff; }
+    .admin-panel { display: none; }
+    .admin-panel.active { display: block; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; margin-bottom: 32px; }
+    .stat-card { background: #fff; padding: 20px; text-align: center; }
+    .stat-card .stat-num { font-size: 32px; font-weight: 700; }
+    .stat-card .stat-label { font-size: 11px; color: #777; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px; }
+    .admin-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .admin-card { background: #fff; padding: 20px; }
+    .admin-card h3 { font-size: 14px; margin-bottom: 8px; }
+    .admin-card p { font-size: 12px; color: #555; margin-bottom: 4px; }
+    .admin-card-actions { display: flex; gap: 8px; margin-top: 12px; }
+    .btn { padding: 8px 16px; border: 1px solid #111; background: transparent; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+    .btn:hover { background: #111; color: #fff; }
+    .btn-primary { background: #111; color: #fff; }
+    .btn-danger { border-color: #e53935; color: #e53935; }
+    .btn-danger:hover { background: #e53935; color: #fff; }
+    .btn-sm { padding: 6px 12px; font-size: 10px; }
+    .toolbar { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+    .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: none; align-items: center; justify-content: center; }
+    .modal-bg.active { display: flex; }
+    .modal-box { background: #fff; padding: 32px; max-width: 560px; width: 90%; max-height: 90vh; overflow-y: auto; }
+    .modal-box h3 { font-size: 16px; margin-bottom: 16px; }
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #777; margin-bottom: 4px; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; font-size: 13px; font-family: inherit; }
+    .form-group textarea { min-height: 100px; resize: vertical; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #eee; }
+    th { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #777; }
+    .newsletter-editor { background: #fff; padding: 24px; margin-bottom: 20px; }
+    .newsletter-editor h3 { font-size: 14px; margin-bottom: 16px; }
+    .history-item { background: #fff; padding: 16px; margin-bottom: 8px; }
+    .empty-state { text-align: center; padding: 40px; color: #999; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; }
+    .settings-form { background: #fff; padding: 24px; max-width: 500px; }
+    .settings-form h3 { font-size: 14px; margin-bottom: 16px; }
+    .badge { display: inline-block; padding: 2px 8px; font-size: 10px; border-radius: 2px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .badge-green { background: #e8f5e9; color: #2e7d32; }
+    .badge-red { background: #ffebee; color: #c62828; }
+    .badge-gray { background: #f5f5f5; color: #777; }
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN SCREEN -->
+  <div id="loginScreen" class="login-screen">
+    <h2>TrustTheHood Admin</h2>
+    <div class="login-error" id="loginError">Неверный пароль</div>
+    <input type="password" id="loginPassword" placeholder="Пароль">
+    <button id="loginBtn">Войти</button>
+  </div>
+
+  <!-- ADMIN PANEL -->
+  <div id="adminPanel" style="display:none;">
+    <div class="admin-header">
+      <h1>TrustTheHood — Админка</h1>
+      <p>Управление товарами, подписчиками и рассылкой</p>
+    </div>
+
+    <div class="admin-tabs">
+      <button class="admin-tab active" data-tab="dashboard">Обзор</button>
+      <button class="admin-tab" data-tab="products">Товары</button>
+      <button class="admin-tab" data-tab="subscribers">Подписчики</button>
+      <button class="admin-tab" data-tab="newsletter">Рассылка</button>
+      <button class="admin-tab" data-tab="settings">Настройки</button>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="admin-panel active" id="tab-dashboard">
+      <div class="stats-grid" id="statsGrid"></div>
+    </div>
+
+    <!-- PRODUCTS -->
+    <div class="admin-panel" id="tab-products">
+      <div class="toolbar">
+        <button class="btn btn-primary" id="addProductBtn">+ Новый товар</button>
+      </div>
+      <div class="admin-grid" id="productsGrid"></div>
+    </div>
+
+    <!-- SUBSCRIBERS -->
+    <div class="admin-panel" id="tab-subscribers">
+      <div class="toolbar">
+        <button class="btn" id="exportCsvBtn">Скачать CSV</button>
+        <button class="btn" id="copyEmailsBtn">Копировать email</button>
+        <span id="subsCount" style="font-size:12px;color:#777;"></span>
+      </div>
+      <div id="subscribersList"></div>
+    </div>
+
+    <!-- NEWSLETTER -->
+    <div class="admin-panel" id="tab-newsletter">
+      <div class="newsletter-editor">
+        <h3>Новая рассылка</h3>
+        <div class="form-group">
+          <label>Тема письма</label>
+          <input type="text" id="nlSubject" placeholder="Новая коллекция уже в магазине!">
+        </div>
+        <div class="form-group">
+          <label>Текст письма (HTML)</label>
+          <textarea id="nlBody" placeholder="<h2>Привет!</h2><p>У нас новое поступление...</p>"></textarea>
+        </div>
+        <button class="btn btn-primary" id="sendNewsletterBtn">Отправить всем подписчикам</button>
+        <div id="nlResult" style="margin-top:12px;font-size:12px;"></div>
+      </div>
+      <h3 style="font-size:14px;margin-bottom:12px;">История рассылок</h3>
+      <div id="newsletterHistory"></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="admin-panel" id="tab-settings">
+      <div class="settings-form">
+        <h3>SMTP настройки (для рассылки)</h3>
+        <div class="form-group"><label>SMTP Хост</label><input type="text" id="setSmtpHost"></div>
+        <div class="form-group"><label>SMTP Порт</label><input type="text" id="setSmtpPort"></div>
+        <div class="form-group"><label>Email (логин)</label><input type="text" id="setSmtpUser"></div>
+        <div class="form-group"><label>Пароль приложения</label><input type="password" id="setSmtpPass"></div>
+        <div class="form-group"><label>Отправитель (From)</label><input type="text" id="setSmtpFrom"></div>
+        <button class="btn btn-primary" id="saveSettingsBtn">Сохранить</button>
+        <div id="settingsResult" style="margin-top:8px;font-size:12px;color:#2e7d32;"></div>
+      </div>
+      <div class="settings-form" style="margin-top:24px;">
+        <h3>Сменить пароль админки</h3>
+        <div class="form-group"><label>Новый пароль</label><input type="password" id="newAdminPass"></div>
+        <button class="btn" id="changePassBtn">Сменить</button>
+        <div id="passResult" style="margin-top:8px;font-size:12px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRODUCT MODAL -->
+  <div class="modal-bg" id="productModal">
+    <div class="modal-box">
+      <h3 id="productModalTitle">Новый товар</h3>
+      <div class="form-row">
+        <div class="form-group"><label>Название</label><input type="text" id="editName"></div>
+        <div class="form-group"><label>Data ID</label><input type="text" id="editDataId"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Цена</label><input type="text" id="editPrice"></div>
+        <div class="form-group"><label>Старая цена</label><input type="text" id="editOldPrice"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Цвет</label><input type="text" id="editColor"></div>
+        <div class="form-group"><label>Артикул (SKU)</label><input type="text" id="editSku"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Категория</label>
+          <select id="editCategory">
+            <option value="верх">Верх</option>
+            <option value="низ">Низ</option>
+            <option value="обувь">Обувь</option>
+            <option value="аксессуары">Аксессуары</option>
+            <option value="ковры">Ковры</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Тег</label>
+          <select id="editTag">
+            <option value="">Нет</option>
+            <option value="sale">Скидка</option>
+            <option value="new">Новинка</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Статус</label>
+        <select id="editSoldOut">
+          <option value="false">В наличии</option>
+          <option value="true">Продано</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Картинки (по одному URL на строку)</label>
+        <textarea id="editImages" placeholder="assets/images/photo1.jpg&#10;assets/images/photo2.jpg"></textarea>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:16px;">
+        <button class="btn btn-primary" id="saveProductBtn">Сохранить</button>
+        <button class="btn" id="cancelProductBtn">Отмена</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Admin Panel JS
+    let adminPassword = '';
+    let editingProductId = null;
+
+    const $ = id => document.getElementById(id);
+
+    function apiHeaders() {
+      return { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword };
+    }
+
+    async function apiGet(url) {
+      const res = await fetch(url, { headers: apiHeaders() });
+      if (!res.ok) throw new Error((await res.json()).error || 'Ошибка');
+      return res.json();
+    }
+
+    async function apiPost(url, data) {
+      const res = await fetch(url, { method: 'POST', headers: apiHeaders(), body: JSON.stringify(data) });
+      return res.json();
+    }
+
+    async function apiPut(url, data) {
+      const res = await fetch(url, { method: 'PUT', headers: apiHeaders(), body: JSON.stringify(data) });
+      return res.json();
+    }
+
+    async function apiDelete(url) {
+      const res = await fetch(url, { method: 'DELETE', headers: apiHeaders() });
+      return res.json();
+    }
+
+    // LOGIN
+    $('loginBtn').addEventListener('click', async () => {
+      const pass = $('loginPassword').value;
+      try {
+        const res = await fetch('/api/auth/check', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: pass }) });
+        const data = await res.json();
+        if (data.ok) {
+          adminPassword = pass;
+          $('loginScreen').style.display = 'none';
+          $('adminPanel').style.display = 'block';
+          loadDashboard();
+        } else {
+          $('loginError').style.display = 'block';
+        }
+      } catch { $('loginError').style.display = 'block'; }
+    });
+    $('loginPassword').addEventListener('keydown', e => { if (e.key === 'Enter') $('loginBtn').click(); });
+
+    // TABS
+    document.querySelectorAll('.admin-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        $('tab-' + tab.dataset.tab).classList.add('active');
+        if (tab.dataset.tab === 'dashboard') loadDashboard();
+        if (tab.dataset.tab === 'products') loadProducts();
+        if (tab.dataset.tab === 'subscribers') loadSubscribers();
+        if (tab.dataset.tab === 'newsletter') loadNewsletterHistory();
+        if (tab.dataset.tab === 'settings') loadSettings();
+      });
+    });
+
+    // DASHBOARD
+    async function loadDashboard() {
+      try {
+        const stats = await apiGet('/api/stats');
+        $('statsGrid').innerHTML = `
+          <div class="stat-card"><div class="stat-num">${stats.totalProducts}</div><div class="stat-label">Товаров</div></div>
+          <div class="stat-card"><div class="stat-num">${stats.inStock}</div><div class="stat-label">В наличии</div></div>
+          <div class="stat-card"><div class="stat-num">${stats.soldOut}</div><div class="stat-label">Продано</div></div>
+          <div class="stat-card"><div class="stat-num">${stats.totalSubscribers}</div><div class="stat-label">Подписчиков</div></div>
+          <div class="stat-card"><div class="stat-num">${stats.totalNewsletters}</div><div class="stat-label">Рассылок</div></div>
+        `;
+      } catch (err) { $('statsGrid').innerHTML = '<div class="empty-state">Ошибка загрузки</div>'; }
+    }
+
+    // PRODUCTS
+    async function loadProducts() {
+      try {
+        const products = await apiGet('/api/products');
+        if (products.length === 0) { $('productsGrid').innerHTML = '<div class="empty-state">Нет товаров. Запустите миграцию: npm run migrate</div>'; return; }
+        $('productsGrid').innerHTML = products.map(p => `
+          <div class="admin-card">
+            <h3>${p.name || 'Без названия'}</h3>
+            <p>${p.price} ₽ ${p.old_price ? '<s>' + p.old_price + ' ₽</s>' : ''}</p>
+            <p>Цвет: ${p.color || '—'} · ${p.category || '—'}</p>
+            <p>SKU: ${p.sku || '—'} · ID: ${p.data_id || '—'}</p>
+            <p>${p.sold_out ? '<span class="badge badge-red">Продано</span>' : '<span class="badge badge-green">В наличии</span>'} ${p.tag ? '<span class="badge badge-gray">' + p.tag + '</span>' : ''}</p>
+            <p style="font-size:10px;color:#999;">${(p.images || []).length} фото</p>
+            <div class="admin-card-actions">
+              <button class="btn btn-sm" onclick="editProduct(${p.id})">Редактировать</button>
+              <button class="btn btn-sm btn-danger" onclick="deleteProduct(${p.id}, '${p.name.replace(/'/g, "\\'")}')">Удалить</button>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) { $('productsGrid').innerHTML = '<div class="empty-state">Ошибка: ' + err.message + '</div>'; }
+    }
+
+    $('addProductBtn').addEventListener('click', () => {
+      editingProductId = null;
+      $('productModalTitle').textContent = 'Новый товар';
+      $('editName').value = ''; $('editPrice').value = ''; $('editOldPrice').value = '';
+      $('editColor').value = ''; $('editSku').value = ''; $('editDataId').value = '';
+      $('editCategory').value = 'верх'; $('editTag').value = ''; $('editSoldOut').value = 'false';
+      $('editImages').value = '';
+      $('productModal').classList.add('active');
+    });
+
+    window.editProduct = async function(id) {
+      try {
+        const p = await apiGet('/api/products/' + id);
+        editingProductId = id;
+        $('productModalTitle').textContent = 'Редактировать товар';
+        $('editName').value = p.name || '';
+        $('editPrice').value = p.price || '';
+        $('editOldPrice').value = p.old_price || '';
+        $('editColor').value = p.color || '';
+        $('editSku').value = p.sku || '';
+        $('editDataId').value = p.data_id || '';
+        $('editCategory').value = p.category || 'верх';
+        $('editTag').value = p.tag || '';
+        $('editSoldOut').value = p.sold_out ? 'true' : 'false';
+        $('editImages').value = (p.images || []).join('\n');
+        $('productModal').classList.add('active');
+      } catch (err) { alert('Ошибка: ' + err.message); }
+    };
+
+    window.deleteProduct = async function(id, name) {
+      if (!confirm('Удалить "' + name + '"?')) return;
+      try { await apiDelete('/api/products/' + id); loadProducts(); } catch (err) { alert('Ошибка: ' + err.message); }
+    };
+
+    $('saveProductBtn').addEventListener('click', async () => {
+      const data = {
+        name: $('editName').value.trim(),
+        price: $('editPrice').value.trim(),
+        old_price: $('editOldPrice').value.trim(),
+        color: $('editColor').value.trim(),
+        sku: $('editSku').value.trim(),
+        data_id: $('editDataId').value.trim(),
+        category: $('editCategory').value,
+        tag: $('editTag').value,
+        sold_out: $('editSoldOut').value === 'true',
+        images: $('editImages').value.split('\n').map(s => s.trim()).filter(Boolean)
+      };
+      if (!data.name || !data.price) { alert('Название и цена обязательны'); return; }
+      try {
+        if (editingProductId) { await apiPut('/api/products/' + editingProductId, data); }
+        else { await apiPost('/api/products', data); }
+        $('productModal').classList.remove('active');
+        loadProducts();
+      } catch (err) { alert('Ошибка: ' + err.message); }
+    });
+
+    $('cancelProductBtn').addEventListener('click', () => $('productModal').classList.remove('active'));
+    $('productModal').addEventListener('click', e => { if (e.target === $('productModal')) $('productModal').classList.remove('active'); });
+
+    // SUBSCRIBERS
+    async function loadSubscribers() {
+      try {
+        const subs = await apiGet('/api/subscribers');
+        $('subsCount').textContent = subs.length + ' подписчиков';
+        if (subs.length === 0) { $('subscribersList').innerHTML = '<div class="empty-state">Нет подписчиков</div>'; return; }
+        $('subscribersList').innerHTML = `<table><thead><tr><th>№</th><th>Email</th><th>Страница</th><th>Дата</th><th></th></tr></thead><tbody>${subs.map((s, i) => `<tr><td>${i + 1}</td><td>${s.email}</td><td>${s.page || '—'}</td><td>${s.subscribed_at || '—'}</td><td><button class="btn btn-sm btn-danger" onclick="deleteSub(${s.id})">✕</button></td></tr>`).join('')}</tbody></table>`;
+      } catch (err) { $('subscribersList').innerHTML = '<div class="empty-state">Ошибка: ' + err.message + '</div>'; }
+    }
+
+    window.deleteSub = async function(id) {
+      try { await apiDelete('/api/subscribers/' + id); loadSubscribers(); } catch (err) { alert(err.message); }
+    };
+
+    $('exportCsvBtn').addEventListener('click', () => {
+      window.open('/api/subscribers/export/csv?password=' + encodeURIComponent(adminPassword));
+    });
+
+    $('copyEmailsBtn').addEventListener('click', async () => {
+      try {
+        const subs = await apiGet('/api/subscribers');
+        const text = subs.map(s => s.email).join('\n');
+        await navigator.clipboard.writeText(text);
+        alert('Скопировано ' + subs.length + ' email');
+      } catch (err) { alert('Ошибка: ' + err.message); }
+    });
+
+    // NEWSLETTER
+    async function loadNewsletterHistory() {
+      try {
+        const history = await apiGet('/api/newsletter/history');
+        if (history.length === 0) { $('newsletterHistory').innerHTML = '<div class="empty-state">Рассылок пока не было</div>'; return; }
+        $('newsletterHistory').innerHTML = history.map(h => `
+          <div class="history-item">
+            <strong>${h.subject}</strong>
+            <span style="font-size:11px;color:#777;margin-left:8px;">Отправлено: ${h.sent_to} · ${h.sent_at}</span>
+          </div>
+        `).join('');
+      } catch (err) { $('newsletterHistory').innerHTML = '<div class="empty-state">Ошибка</div>'; }
+    }
+
+    $('sendNewsletterBtn').addEventListener('click', async () => {
+      const subject = $('nlSubject').value.trim();
+      const body = $('nlBody').value.trim();
+      if (!subject || !body) { alert('Заполните тему и текст'); return; }
+      if (!confirm('Отправить рассылку всем подписчикам?')) return;
+      $('nlResult').textContent = 'Отправка...';
+      $('nlResult').style.color = '#777';
+      try {
+        const res = await apiPost('/api/newsletter/send', { subject, body });
+        $('nlResult').textContent = res.message || 'Отправлено';
+        $('nlResult').style.color = '#2e7d32';
+        if (res.errors && res.errors.length > 0) {
+          $('nlResult').textContent += ' | Ошибки: ' + res.errors.map(e => e.email).join(', ');
+        }
+        loadNewsletterHistory();
+      } catch (err) { $('nlResult').textContent = 'Ошибка: ' + err.message; $('nlResult').style.color = '#e53935'; }
+    });
+
+    // SETTINGS
+    async function loadSettings() {
+      try {
+        const s = await apiGet('/api/settings');
+        $('setSmtpHost').value = s.smtp_host || '';
+        $('setSmtpPort').value = s.smtp_port || '';
+        $('setSmtpUser').value = s.smtp_user || '';
+        $('setSmtpPass').value = s.smtp_pass || '';
+        $('setSmtpFrom').value = s.smtp_from || '';
+      } catch {}
+    }
+
+    $('saveSettingsBtn').addEventListener('click', async () => {
+      try {
+        await apiPut('/api/settings', {
+          smtp_host: $('setSmtpHost').value, smtp_port: $('setSmtpPort').value,
+          smtp_user: $('setSmtpUser').value, smtp_pass: $('setSmtpPass').value,
+          smtp_from: $('setSmtpFrom').value
+        });
+        $('settingsResult').textContent = 'Сохранено!';
+        setTimeout(() => $('settingsResult').textContent = '', 3000);
+      } catch (err) { $('settingsResult').textContent = 'Ошибка'; $('settingsResult').style.color = '#e53935'; }
+    });
+
+    $('changePassBtn').addEventListener('click', async () => {
+      const newPass = $('newAdminPass').value;
+      if (!newPass || newPass.length < 4) { $('passResult').textContent = 'Минимум 4 символа'; $('passResult').style.color = '#e53935'; return; }
+      try {
+        await apiPut('/api/settings/password', { new_password: newPass });
+        adminPassword = newPass;
+        $('passResult').textContent = 'Пароль изменён!';
+        $('passResult').style.color = '#2e7d32';
+        $('newAdminPass').value = '';
+      } catch (err) { $('passResult').textContent = 'Ошибка'; $('passResult').style.color = '#e53935'; }
+    });
+  </script>
+</body>
+</html>

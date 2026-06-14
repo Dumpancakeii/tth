@@ -1,0 +1,43 @@
+# Зависимости Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Файлы базы данных SQLite
+database.db
+database.db-shm
+database.db-wal
+*.db
+
+# Переменные окружения
+.env
+.env.local
+.env.*.local
+
+# Логи
+*.log
+logs/
+
+# Временные файлы
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# IDE и редакторы
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Сборка и артефакты
+dist/
+build/
+*.min.js
+*.min.css
+
+# Кэш
+.cache/
+*.cache
