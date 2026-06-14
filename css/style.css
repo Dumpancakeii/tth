@@ -140,24 +140,13 @@ header {
   justify-content: space-between;
   align-items: center;
   background: transparent;
-  color: #111;
-  transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+  transition: background 0.3s ease, border-color 0.3s ease;
   border-bottom: 1px solid transparent;
 }
 
 header.scrolled {
   background: rgba(255, 255, 255, 0.98);
   border-bottom: 1px solid rgba(17, 17, 17, 0.08);
-  color: #111;
-}
-
-/* Главная страница: белый навбар → чёрный при скролле */
-body.page-home header {
-  color: #fff;
-}
-
-body.page-home header.scrolled {
-  color: #111;
 }
 
 header .logo {
@@ -375,18 +364,8 @@ header nav a:hover {
   left: 11px;
   transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1),
               opacity 0.2s ease,
-              top 0.3s cubic-bezier(0.23, 1, 0.32, 1),
-              background 0.3s ease;
+              top 0.3s cubic-bezier(0.23, 1, 0.32, 1);
   border-radius: 1px;
-}
-
-/* Главная страница: белые линии бургера → чёрные при скролле */
-body.page-home .burger-line {
-  background: #fff;
-}
-
-body.page-home header.scrolled .burger-line {
-  background: #111;
 }
 
 .burger-line:nth-child(1) {
