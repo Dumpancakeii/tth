@@ -24,6 +24,7 @@ export default function Header() {
       <header
         className={`fixed top-0 left-0 w-full z-50 h-[72px] flex items-center justify-between px-8 transition-all duration-300 ${
           scrolled
+            ? 'text-foreground' : 'text-white'
             ? 'bg-white/98 border-b border-foreground/10'
             : 'bg-transparent border-b border-transparent'
         }`}
