@@ -1,0 +1,45 @@
+/* Typography Scale */
+
+:root {
+  /* Font families */
+  --font-sans: 'Space Grotesk', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'Courier New', Courier, monospace;
+
+  /* Font sizes - fluid scale */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 2rem;
+  --text-display: clamp(3rem, 8vw, 6rem);
+
+  /* Line heights */
+  --leading-tight: 0.92;
+  --leading-normal: 1.2;
+  --leading-relaxed: 1.6;
+}
+
+/* Utility classes */
+.uppercase-tracking {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: var(--text-xs);
+}
+
+.display-text {
+  font-size: var(--text-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  line-height: var(--leading-tight);
+}
+
+.section-title {
+  font-size: clamp(1.5rem, 4vw, 3rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  line-height: var(--leading-tight);
+}
