@@ -1,81 +1,72 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import MobileMenu from './MobileMenu';
+import { navigation } from '@/config/navigation';
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const [cartCount] = useState(0);
 
-  const links = [
-    { href: '/', label: 'Home' },
-    { href: '/shop', label: 'Shop' },
-    { href: '/lookbook', label: 'Lookbook' },
-    { href: '/info', label: 'Info' },
-  ];
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
     <>
-      <header className="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-10 py-6 bg-white/95 backdrop-blur border-b border-foreground">
-        <Link href="/" className="font-mono text-xs tracking-[0.3em] uppercase font-bold">
+      <header
+        className={`fixed top-0 left-0 w-full z-50 h-[72px] flex items-center justify-between px-8 transition-all duration-300 ${
+          scrolled
+            ? 'bg-white/98 border-b border-foreground/10'
+            : 'bg-transparent border-b border-transparent'
+        }`}
+      >
+        <Link
+          href="/"
+          className={`text-sm font-medium tracking-[0.12em] uppercase transition-colors duration-300 ${
+            scrolled ? 'text-foreground' : 'text-white'
+          }`}
+        >
           TrustTheHood
         </Link>
 
-        <nav className="hidden md:flex items-center gap-10">
-          {links.map((link) => (
+        <nav className="hidden md:flex items-center gap-6">
+          {navigation.map((item) => (
             <Link
-              key={link.href}
-              href={link.href}
-              className="text-accent hover:text-foreground transition-colors text-[0.6rem] tracking-[0.25em] uppercase font-medium"
+              key={item.href}
+              href={item.href}
+              className={`text-sm tracking-[0.12em] uppercase font-medium hover:opacity-60 transition-all duration-300 ${
+                scrolled ? 'text-foreground' : 'text-white'
+              }`}
             >
-              {link.label}
+              {item.title}
             </Link>
           ))}
-          <span className="text-accent text-[0.6rem] tracking-[0.25em] uppercase font-mono">
+          <span className={`text-sm tracking-[0.12em] uppercase font-medium transition-colors duration-300 ${
+            scrolled ? 'text-foreground' : 'text-white'
+          } opacity-60`}>
             CART ({cartCount})
           </span>
         </nav>
 
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className="md:hidden text-xl cursor-pointer bg-none border-none text-foreground"
-          aria-label="Toggle menu"
+          className={`md:hidden text-sm tracking-[0.12em] uppercase font-medium bg-none border-none cursor-pointer transition-colors duration-300 ${
+            scrolled ? 'text-foreground' : 'text-white'
+          }`}
         >
-          {menuOpen ? '✕' : '☰'}
+          MENU
         </button>
       </header>
 
-      <AnimatePresence>
-        {menuOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 bg-white flex flex-col items-center justify-center gap-8 md:hidden"
-          >
-            <button
-              onClick={() => setMenuOpen(false)}
-              className="absolute top-6 right-10 text-2xl cursor-pointer bg-none border-none text-foreground"
-            >
-              ✕
-            </button>
-            {links.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setMenuOpen(false)}
-                className="text-accent hover:text-foreground transition-colors text-xl font-bold uppercase tracking-widest"
-              >
-                {link.label}
-              </Link>
-            ))}
-            <span className="text-accent text-xl font-bold uppercase tracking-widest font-mono">
-              CART ({cartCount})
-            </span>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <MobileMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
     </>
   );
 }
